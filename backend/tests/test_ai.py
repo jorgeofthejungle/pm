@@ -127,10 +127,10 @@ def test_ai_receives_board_in_system_prompt(client):
         client.post("/api/ai", json={"message": "hi"})
     call_kwargs = mock_client.messages.create.call_args.kwargs
     assert "system" in call_kwargs
-    system = call_kwargs["system"]
-    assert "col-backlog" in system
-    assert "Backlog" in system
-    assert "card-1" in system
+    system_text = call_kwargs["system"][0]["text"]
+    assert "col-backlog" in system_text
+    assert "Backlog" in system_text
+    assert "card-1" in system_text
 
 
 def test_ai_receives_update_board_tool(client):

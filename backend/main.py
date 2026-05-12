@@ -13,8 +13,14 @@ import db
 
 CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY", "")
 AI_MODEL = "claude-opus-4-7"
+DEBUG = os.environ.get("DEBUG", "").lower() in ("1", "true", "yes")
 
-SECRET_KEY = "kanban-secret-change-in-prod"
+SECRET_KEY: str = os.environ.get("SECRET_KEY", "")
+if not SECRET_KEY:
+    if DEBUG:
+        SECRET_KEY = "dev-secret-not-for-production"
+    else:
+        raise RuntimeError("SECRET_KEY environment variable is required")
 _signer = URLSafeTimedSerializer(SECRET_KEY)
 
 STATIC_DIR = Path(__file__).parent.parent / "frontend" / "out"
@@ -50,6 +56,7 @@ def _set_session(response: Response, user_id: str) -> None:
         _sign(user_id),
         httponly=True,
         samesite="lax",
+        secure=not DEBUG,
         max_age=86400 * 7,
     )
 
@@ -268,29 +275,49 @@ def ai_chat(body: AiRequest, user_id: str = Depends(get_current_user)):
 
     messages = [
         {"role": m.role, "content": m.content}
-        for m in body.history
+        for m in body.history[-50:]
     ] + [{"role": "user", "content": body.message}]
 
     client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
-    response = client.messages.create(
-        model=AI_MODEL,
-        max_tokens=1024,
-        system=_build_system_prompt(board),
-        tools=[_UPDATE_BOARD_TOOL],
-        messages=messages,
-    )
+    system = [{"type": "text", "text": _build_system_prompt(board), "cache_control": {"type": "ephemeral"}}]
 
     reply_text = ""
-    board_update = None
+    all_operations: list[dict] = []
+    all_errors: list[str] = []
 
-    for block in response.content:
-        if block.type == "text":
-            reply_text += block.text
-        elif block.type == "tool_use" and block.name == "update_board":
-            operations = block.input.get("operations", [])
-            errors = db.apply_board_update(operations, user_id, db.DB_PATH)
-            board_update = {"operations": operations, "errors": errors}
+    for _ in range(5):
+        response = client.messages.create(
+            model=AI_MODEL,
+            max_tokens=1024,
+            system=system,
+            tools=[_UPDATE_BOARD_TOOL],
+            messages=messages,
+        )
 
+        tool_results = []
+        for block in response.content:
+            if block.type == "text":
+                reply_text += block.text
+            elif block.type == "tool_use" and block.name == "update_board":
+                operations = block.input.get("operations", [])  # type: ignore[union-attr]
+                if not operations:
+                    tool_results.append({"type": "tool_result", "tool_use_id": block.id, "content": "No operations provided."})
+                    continue
+                errors = db.apply_board_update(operations, user_id, db.DB_PATH)
+                all_operations.extend(operations)
+                all_errors.extend(errors)
+                result_text = "Applied." if not errors else f"Errors: {'; '.join(errors)}"
+                tool_results.append({"type": "tool_result", "tool_use_id": block.id, "content": result_text})
+
+        if response.stop_reason != "tool_use":
+            break
+
+        messages = messages + [
+            {"role": "assistant", "content": response.content},
+            {"role": "user", "content": tool_results},
+        ]
+
+    board_update = {"operations": all_operations, "errors": all_errors} if all_operations else None
     return {"reply": reply_text.strip(), "boardUpdate": board_update}
 
 

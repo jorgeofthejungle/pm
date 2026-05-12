@@ -37,8 +37,7 @@ vi.mock("@/lib/api", () => ({
 
 import { api } from "@/lib/api";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mockApi = api as any;
+const mockApi = vi.mocked(api);
 
 beforeEach(() => {
   mockApi.getBoard.mockResolvedValue(structuredClone(mockBoard));

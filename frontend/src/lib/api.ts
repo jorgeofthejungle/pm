@@ -1,6 +1,6 @@
 import type { BoardData } from "@/lib/kanban";
 
-const BASE = typeof window !== "undefined" ? "" : "http://localhost:8000";
+const BASE = "";
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
@@ -59,7 +59,7 @@ export const api = {
 
   chat: (
     message: string,
-    history: { role: string; content: string }[],
+    history: { role: "user" | "assistant"; content: string }[],
   ) =>
     request<{
       reply: string;

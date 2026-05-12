@@ -20,8 +20,9 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
     try {
       await api.login(username, password);
       onLogin();
-    } catch {
-      setError("Invalid username or password.");
+    } catch (err) {
+      const status = (err as { status?: number }).status;
+      setError(status === 401 ? "Invalid username or password." : "Server unreachable — try again.");
     } finally {
       setLoading(false);
     }

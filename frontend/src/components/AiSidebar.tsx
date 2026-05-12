@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import clsx from "clsx";
 import { api } from "@/lib/api";
 
 type Message = {
@@ -44,7 +45,7 @@ export const AiSidebar = ({ open, onClose, onBoardMutated }: AiSidebarProps) => 
     setThinking(true);
 
     try {
-      const history = messages.map((m) => ({ role: m.role, content: m.content }));
+      const history = messages.slice(-50).map((m) => ({ role: m.role, content: m.content }));
       const result = await api.chat(text, history);
       const assistantMsg: Message = { role: "assistant", content: result.reply || "(no reply)" };
       setMessages((prev) => [...prev, assistantMsg]);
@@ -79,12 +80,12 @@ export const AiSidebar = ({ open, onClose, onBoardMutated }: AiSidebarProps) => 
       {/* Sidebar panel */}
       <aside
         data-testid="ai-sidebar"
-        className={[
+        className={clsx(
           "fixed right-0 top-0 z-30 flex h-full w-full max-w-sm flex-col",
           "border-l border-[var(--stroke)] bg-white shadow-[-8px_0_32px_rgba(3,33,71,0.1)]",
           "transition-transform duration-300 ease-in-out",
           open ? "translate-x-0" : "translate-x-full",
-        ].join(" ")}
+        )}
         aria-label="AI assistant"
       >
         {/* Header */}
@@ -121,12 +122,12 @@ export const AiSidebar = ({ open, onClose, onBoardMutated }: AiSidebarProps) => 
               className={msg.role === "user" ? "flex justify-end" : "flex justify-start"}
             >
               <div
-                className={[
+                className={clsx(
                   "max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-6",
                   msg.role === "user"
                     ? "bg-[var(--secondary-purple)] text-white"
                     : "border border-[var(--stroke)] bg-[var(--surface)] text-[var(--navy-dark)]",
-                ].join(" ")}
+                )}
               >
                 {msg.content}
               </div>

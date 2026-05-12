@@ -350,12 +350,10 @@ def update_card(card_id: str, title: str | None, details: str | None, user_id: s
         if not owned:
             return False
         with conn:
-            if title is not None and details is not None:
-                conn.execute("UPDATE cards SET title = ?, details = ? WHERE id = ?", (title, details, card_id))
-            elif title is not None:
-                conn.execute("UPDATE cards SET title = ? WHERE id = ?", (title, card_id))
-            else:
-                conn.execute("UPDATE cards SET details = ? WHERE id = ?", (details, card_id))
+            conn.execute(
+                "UPDATE cards SET title = COALESCE(?, title), details = COALESCE(?, details) WHERE id = ?",
+                (title, details, card_id),
+            )
         return True
     finally:
         conn.close()

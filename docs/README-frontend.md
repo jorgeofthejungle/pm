@@ -1,5 +1,7 @@
 # Kanban Studio
 
+Run from the `frontend/` directory.
+
 ## Run
 
 ```bash

@@ -82,4 +82,4 @@ Moves within a single column collapse to a single `UPDATE` shifting the affected
 
 ## Out of scope for the MVP
 
-No `created_at` / `updated_at`. No soft-delete. No board-level metadata beyond `name`. Add if Parts 9–10 need them.
+No `created_at` / `updated_at`. No soft-delete. No board-level metadata beyond `name`.
