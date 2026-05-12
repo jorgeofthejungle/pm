@@ -124,11 +124,12 @@ def rename_column(column_id: str, body: RenameColumnRequest, user_id: str = Depe
 class AddCardRequest(BaseModel):
     title: str
     details: str = ""
+    notes: str = ""
 
 
 @app.post("/api/columns/{column_id}/cards")
 def add_card(column_id: str, body: AddCardRequest, user_id: str = Depends(get_current_user)):
-    card = db.add_card(column_id, body.title, body.details, user_id, db.DB_PATH)
+    card = db.add_card(column_id, body.title, body.details, body.notes, user_id, db.DB_PATH)
     if not card:
         raise HTTPException(status_code=404, detail="Column not found")
     return card
@@ -137,11 +138,12 @@ def add_card(column_id: str, body: AddCardRequest, user_id: str = Depends(get_cu
 class UpdateCardRequest(BaseModel):
     title: Optional[str] = None
     details: Optional[str] = None
+    notes: Optional[str] = None
 
 
 @app.patch("/api/cards/{card_id}")
 def update_card(card_id: str, body: UpdateCardRequest, user_id: str = Depends(get_current_user)):
-    if not db.update_card(card_id, body.title, body.details, user_id, db.DB_PATH):
+    if not db.update_card(card_id, body.title, body.details, body.notes, user_id, db.DB_PATH):
         raise HTTPException(status_code=404, detail="Card not found")
     return {"ok": True}
 
@@ -191,6 +193,7 @@ _UPDATE_BOARD_TOOL = {
                                 "columnId": {"type": "string"},
                                 "title": {"type": "string"},
                                 "details": {"type": "string", "default": ""},
+                                "notes": {"type": "string", "default": ""},
                             },
                             "required": ["op", "columnId", "title"],
                         },
@@ -211,6 +214,7 @@ _UPDATE_BOARD_TOOL = {
                                 "cardId": {"type": "string"},
                                 "title": {"type": "string"},
                                 "details": {"type": "string"},
+                                "notes": {"type": "string"},
                             },
                             "required": ["op", "cardId"],
                         },

@@ -36,13 +36,13 @@ export const api = {
       body: JSON.stringify({ title }),
     }),
 
-  addCard: (columnId: string, title: string, details: string) =>
-    request<{ id: string; title: string; details: string }>(
+  addCard: (columnId: string, title: string, details: string, notes: string = "") =>
+    request<{ id: string; title: string; details: string; notes: string }>(
       `/api/columns/${columnId}/cards`,
-      { method: "POST", body: JSON.stringify({ title, details }) }
+      { method: "POST", body: JSON.stringify({ title, details, notes }) }
     ),
 
-  updateCard: (cardId: string, patch: { title?: string; details?: string }) =>
+  updateCard: (cardId: string, patch: { title?: string; details?: string; notes?: string }) =>
     request<{ ok: boolean }>(`/api/cards/${cardId}`, {
       method: "PATCH",
       body: JSON.stringify(patch),

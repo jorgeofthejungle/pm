@@ -17,6 +17,7 @@ import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { KanbanColumn } from "@/components/KanbanColumn";
 import { KanbanCardPreview } from "@/components/KanbanCardPreview";
 import { AiSidebar } from "@/components/AiSidebar";
+import { CardModal } from "@/components/CardModal";
 import { moveCard, type BoardData } from "@/lib/kanban";
 import { api } from "@/lib/api";
 
@@ -27,6 +28,7 @@ type KanbanBoardProps = {
 export const KanbanBoard = ({ onLogout }: KanbanBoardProps) => {
   const [board, setBoard] = useState<BoardData | null>(null);
   const [activeCardId, setActiveCardId] = useState<string | null>(null);
+  const [editingCardId, setEditingCardId] = useState<string | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -101,6 +103,16 @@ export const KanbanBoard = ({ onLogout }: KanbanBoardProps) => {
         ),
       }
     );
+  };
+
+  const handleUpdateCard = async (
+    cardId: string,
+    patch: { title: string; details: string; notes: string },
+  ) => {
+    setBoard((prev) =>
+      prev && { ...prev, cards: { ...prev.cards, [cardId]: { ...prev.cards[cardId], ...patch } } }
+    );
+    await api.updateCard(cardId, patch).catch(refreshBoard);
   };
 
   const handleDeleteCard = (columnId: string, cardId: string) => {
@@ -231,6 +243,7 @@ export const KanbanBoard = ({ onLogout }: KanbanBoardProps) => {
                 onRename={handleRenameColumn}
                 onAddCard={handleAddCard}
                 onDeleteCard={handleDeleteCard}
+                onEditCard={setEditingCardId}
               />
             ))}
           </section>
@@ -249,6 +262,14 @@ export const KanbanBoard = ({ onLogout }: KanbanBoardProps) => {
         onClose={() => setSidebarOpen(false)}
         onBoardMutated={refreshBoard}
       />
+
+      {editingCardId && board.cards[editingCardId] && (
+        <CardModal
+          card={board.cards[editingCardId]}
+          onSave={handleUpdateCard}
+          onClose={() => setEditingCardId(null)}
+        />
+      )}
     </div>
   );
 };

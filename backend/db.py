@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS cards (
     column_id TEXT NOT NULL REFERENCES columns(id) ON DELETE CASCADE,
     title     TEXT NOT NULL,
     details   TEXT NOT NULL DEFAULT '',
+    notes     TEXT NOT NULL DEFAULT '',
     position  INTEGER NOT NULL
 );
 
@@ -76,6 +77,10 @@ def init_db(path: Path = DB_PATH) -> None:
     conn = get_conn(path)
     with conn:
         conn.executescript(_SCHEMA)
+        try:
+            conn.execute("ALTER TABLE cards ADD COLUMN notes TEXT NOT NULL DEFAULT ''")
+        except Exception:
+            pass
         user_id = str(uuid.uuid4())
         conn.execute(
             "INSERT OR IGNORE INTO users (id, username, password_hash) VALUES (?, ?, ?)",
@@ -128,7 +133,7 @@ def get_board(user_id: str, path: Path = DB_PATH) -> dict | None:
 
     cards_rows = conn.execute(
         """
-        SELECT c.id, c.column_id, c.title, c.details, c.position
+        SELECT c.id, c.column_id, c.title, c.details, c.notes, c.position
         FROM cards c
         JOIN columns col ON col.id = c.column_id
         WHERE col.board_id = ?
@@ -141,7 +146,7 @@ def get_board(user_id: str, path: Path = DB_PATH) -> dict | None:
     cards_by_col: dict[str, list] = {col["id"]: [] for col in cols}
     cards: dict[str, dict] = {}
     for r in cards_rows:
-        cards[r["id"]] = {"id": r["id"], "title": r["title"], "details": r["details"]}
+        cards[r["id"]] = {"id": r["id"], "title": r["title"], "details": r["details"], "notes": r["notes"]}
         cards_by_col[r["column_id"]].append(r["id"])
 
     return {
@@ -168,7 +173,7 @@ def rename_column(column_id: str, title: str, user_id: str, path: Path = DB_PATH
     return cur.rowcount == 1
 
 
-def add_card(column_id: str, title: str, details: str, user_id: str, path: Path = DB_PATH) -> dict | None:
+def add_card(column_id: str, title: str, details: str, notes: str, user_id: str, path: Path = DB_PATH) -> dict | None:
     conn = get_conn(path)
     try:
         owned = conn.execute(
@@ -188,10 +193,10 @@ def add_card(column_id: str, title: str, details: str, user_id: str, path: Path 
         card_id = "card-" + uuid.uuid4().hex[:8]
         with conn:
             conn.execute(
-                "INSERT INTO cards (id, column_id, title, details, position) VALUES (?, ?, ?, ?, ?)",
-                (card_id, column_id, title, details, pos),
+                "INSERT INTO cards (id, column_id, title, details, notes, position) VALUES (?, ?, ?, ?, ?, ?)",
+                (card_id, column_id, title, details, notes, pos),
             )
-        return {"id": card_id, "title": title, "details": details}
+        return {"id": card_id, "title": title, "details": details, "notes": notes}
     finally:
         conn.close()
 
@@ -307,7 +312,7 @@ def apply_board_update(operations: list[dict], user_id: str, path: Path = DB_PAT
         kind = op.get("op")
         try:
             if kind == "add_card":
-                result = add_card(op["columnId"], op["title"], op.get("details", ""), user_id, path)
+                result = add_card(op["columnId"], op["title"], op.get("details", ""), op.get("notes", ""), user_id, path)
                 if result is None:
                     errors.append(f"add_card: column '{op['columnId']}' not found")
             elif kind == "move_card":
@@ -315,7 +320,7 @@ def apply_board_update(operations: list[dict], user_id: str, path: Path = DB_PAT
                 if not ok:
                     errors.append(f"move_card: card '{op['cardId']}' or column not found")
             elif kind == "update_card":
-                ok = update_card(op["cardId"], op.get("title"), op.get("details"), user_id, path)
+                ok = update_card(op["cardId"], op.get("title"), op.get("details"), op.get("notes"), user_id, path)
                 if not ok:
                     errors.append(f"update_card: card '{op['cardId']}' not found")
             elif kind == "delete_card":
@@ -333,8 +338,8 @@ def apply_board_update(operations: list[dict], user_id: str, path: Path = DB_PAT
     return errors
 
 
-def update_card(card_id: str, title: str | None, details: str | None, user_id: str, path: Path = DB_PATH) -> bool:
-    if title is None and details is None:
+def update_card(card_id: str, title: str | None, details: str | None, notes: str | None, user_id: str, path: Path = DB_PATH) -> bool:
+    if title is None and details is None and notes is None:
         return True
     conn = get_conn(path)
     try:
@@ -351,8 +356,8 @@ def update_card(card_id: str, title: str | None, details: str | None, user_id: s
             return False
         with conn:
             conn.execute(
-                "UPDATE cards SET title = COALESCE(?, title), details = COALESCE(?, details) WHERE id = ?",
-                (title, details, card_id),
+                "UPDATE cards SET title = COALESCE(?, title), details = COALESCE(?, details), notes = COALESCE(?, notes) WHERE id = ?",
+                (title, details, notes, card_id),
             )
         return True
     finally:

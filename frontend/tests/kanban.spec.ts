@@ -10,14 +10,14 @@ const mockBoard: BoardData = {
     { id: "col-done", title: "Done", cardIds: ["card-7", "card-8"] },
   ],
   cards: {
-    "card-1": { id: "card-1", title: "Align roadmap themes", details: "Draft quarterly themes." },
-    "card-2": { id: "card-2", title: "Gather customer signals", details: "Review support tags." },
-    "card-3": { id: "card-3", title: "Prototype analytics view", details: "Sketch layout." },
-    "card-4": { id: "card-4", title: "Refine status language", details: "Standardize labels." },
-    "card-5": { id: "card-5", title: "Design card layout", details: "Add hierarchy." },
-    "card-6": { id: "card-6", title: "QA micro-interactions", details: "Verify states." },
-    "card-7": { id: "card-7", title: "Ship marketing page", details: "Copy approved." },
-    "card-8": { id: "card-8", title: "Close onboarding sprint", details: "Release notes." },
+    "card-1": { id: "card-1", title: "Align roadmap themes", details: "Draft quarterly themes.", notes: "" },
+    "card-2": { id: "card-2", title: "Gather customer signals", details: "Review support tags.", notes: "" },
+    "card-3": { id: "card-3", title: "Prototype analytics view", details: "Sketch layout.", notes: "" },
+    "card-4": { id: "card-4", title: "Refine status language", details: "Standardize labels.", notes: "" },
+    "card-5": { id: "card-5", title: "Design card layout", details: "Add hierarchy.", notes: "" },
+    "card-6": { id: "card-6", title: "QA micro-interactions", details: "Verify states.", notes: "" },
+    "card-7": { id: "card-7", title: "Ship marketing page", details: "Copy approved.", notes: "" },
+    "card-8": { id: "card-8", title: "Close onboarding sprint", details: "Release notes.", notes: "" },
   },
 };
 

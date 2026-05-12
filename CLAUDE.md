@@ -10,7 +10,7 @@ Single-user Kanban PM MVP with an AI chat sidebar that can mutate the board. Log
 
 - Frontend: Next.js 16 (static export), React 19, Tailwind v4, `@dnd-kit` for drag-drop.
 - Backend: FastAPI (Python 3.12), `uv` package manager, SQLite, `itsdangerous` signed session cookies.
-- AI: Anthropic SDK, model `claude-opus-4-7`, key in `.env` as `CLAUDE_API_KEY`.
+- AI: Anthropic SDK, model `claude-opus-4-7`, key in `.env` as `CLAUDE_API_KEY`; `SECRET_KEY` also required.
 - Packaging: Docker (multi-stage: Node builds frontend, Python serves it + API).
 
 ## Architecture
@@ -47,9 +47,8 @@ cd frontend && npm install && npm run dev    # http://localhost:3000
 Tests / lint:
 ```bash
 cd backend  && uv run pytest tests/ -v
-cd backend  && uv run pytest tests/test_api.py::test_login -v   # single test
-cd frontend && npm run test:unit         # vitest
-cd frontend && npm run test:e2e          # playwright (auto-starts next dev)
+cd frontend && npm run test:unit    # vitest
+cd frontend && npm run test:e2e     # playwright (auto-starts next dev)
 cd frontend && npm run lint
 ```
 

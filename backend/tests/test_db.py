@@ -76,7 +76,7 @@ def test_rename_column_not_found(tmp_db):
 
 def test_add_card(tmp_db):
     uid = dbmod.verify_user("user", "password", tmp_db)
-    card = dbmod.add_card("col-backlog", "New task", "Some details", uid, tmp_db)
+    card = dbmod.add_card("col-backlog", "New task", "Some details", "", uid, tmp_db)
     assert card is not None
     assert card["title"] == "New task"
     board = dbmod.get_board(uid, tmp_db)
@@ -87,7 +87,7 @@ def test_add_card(tmp_db):
 
 def test_add_card_bad_column(tmp_db):
     uid = dbmod.verify_user("user", "password", tmp_db)
-    card = dbmod.add_card("col-fake", "X", "", uid, tmp_db)
+    card = dbmod.add_card("col-fake", "X", "", "", uid, tmp_db)
     assert card is None
 
 
@@ -135,7 +135,7 @@ def test_move_card_within_column(tmp_db):
 
 def test_update_card_title(tmp_db):
     uid = dbmod.verify_user("user", "password", tmp_db)
-    ok = dbmod.update_card("card-1", "Updated title", None, uid, tmp_db)
+    ok = dbmod.update_card("card-1", "Updated title", None, None, uid, tmp_db)
     assert ok
     board = dbmod.get_board(uid, tmp_db)
     assert board["cards"]["card-1"]["title"] == "Updated title"
@@ -143,7 +143,7 @@ def test_update_card_title(tmp_db):
 
 def test_update_card_details(tmp_db):
     uid = dbmod.verify_user("user", "password", tmp_db)
-    ok = dbmod.update_card("card-1", None, "New details", uid, tmp_db)
+    ok = dbmod.update_card("card-1", None, "New details", None, uid, tmp_db)
     assert ok
     board = dbmod.get_board(uid, tmp_db)
     assert board["cards"]["card-1"]["details"] == "New details"
@@ -151,7 +151,7 @@ def test_update_card_details(tmp_db):
 
 def test_update_card_not_found(tmp_db):
     uid = dbmod.verify_user("user", "password", tmp_db)
-    ok = dbmod.update_card("card-fake", "X", None, uid, tmp_db)
+    ok = dbmod.update_card("card-fake", "X", None, None, uid, tmp_db)
     assert not ok
 
 
