@@ -1,0 +1,45 @@
+{
+  "database": "sqlite",
+  "tables": [
+    {
+      "name": "users",
+      "columns": [
+        { "name": "id",            "type": "TEXT", "nullable": false, "primaryKey": true },
+        { "name": "username",      "type": "TEXT", "nullable": false, "unique": true },
+        { "name": "password_hash", "type": "TEXT", "nullable": false }
+      ]
+    },
+    {
+      "name": "boards",
+      "columns": [
+        { "name": "id",      "type": "TEXT", "nullable": false, "primaryKey": true },
+        { "name": "user_id", "type": "TEXT", "nullable": false, "references": { "table": "users", "column": "id", "onDelete": "CASCADE" } },
+        { "name": "name",    "type": "TEXT", "nullable": false }
+      ]
+    },
+    {
+      "name": "columns",
+      "columns": [
+        { "name": "id",       "type": "TEXT",    "nullable": false, "primaryKey": true },
+        { "name": "board_id", "type": "TEXT",    "nullable": false, "references": { "table": "boards", "column": "id", "onDelete": "CASCADE" } },
+        { "name": "title",    "type": "TEXT",    "nullable": false },
+        { "name": "position", "type": "INTEGER", "nullable": false }
+      ]
+    },
+    {
+      "name": "cards",
+      "columns": [
+        { "name": "id",        "type": "TEXT",    "nullable": false, "primaryKey": true },
+        { "name": "column_id", "type": "TEXT",    "nullable": false, "references": { "table": "columns", "column": "id", "onDelete": "CASCADE" } },
+        { "name": "title",     "type": "TEXT",    "nullable": false },
+        { "name": "details",   "type": "TEXT",    "nullable": false, "default": "" },
+        { "name": "position",  "type": "INTEGER", "nullable": false }
+      ]
+    }
+  ],
+  "indexes": [
+    { "name": "idx_boards_user",   "table": "boards",  "columns": ["user_id"] },
+    { "name": "idx_columns_board", "table": "columns", "columns": ["board_id"] },
+    { "name": "idx_cards_column",  "table": "cards",   "columns": ["column_id", "position"] }
+  ]
+}
