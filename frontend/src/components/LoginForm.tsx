@@ -29,12 +29,15 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="w-full max-w-sm rounded-[32px] border border-[var(--stroke)] bg-white p-8 shadow-[var(--shadow)]">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
+      <div className="pointer-events-none absolute left-0 top-0 h-[420px] w-[420px] -translate-x-1/3 -translate-y-1/3 rounded-full" style={{ background: "radial-gradient(circle, color-mix(in srgb, #209dd7 25%, transparent) 0%, color-mix(in srgb, #209dd7 5%, transparent) 55%, transparent 70%)" }} />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-[520px] w-[520px] translate-x-1/4 translate-y-1/4 rounded-full" style={{ background: "radial-gradient(circle, color-mix(in srgb, #753991 18%, transparent) 0%, color-mix(in srgb, #753991 5%, transparent) 55%, transparent 75%)" }} />
+
+      <div className="relative z-10 w-full max-w-sm rounded-[32px] border border-[var(--stroke)] bg-white p-8 shadow-[var(--shadow)]">
         <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[var(--gray-text)]">
           Sign in
         </p>
-        <h1 className="mt-3 font-display text-3xl font-semibold text-[var(--navy-dark)]">
+        <h1 className="mt-2 font-display text-3xl font-semibold text-[var(--navy-dark)]">
           Kanban Studio
         </h1>
         <form onSubmit={handleSubmit} className="mt-8 space-y-4">
@@ -52,7 +55,7 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
               onChange={(e) => setUsername(e.target.value)}
               required
               autoComplete="username"
-              className="mt-2 w-full rounded-xl border border-[var(--stroke)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
+              className="mt-2 w-full rounded-xl border border-[var(--stroke)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
             />
           </div>
           <div>
@@ -69,16 +72,16 @@ export const LoginForm = ({ onLogin }: LoginFormProps) => {
               onChange={(e) => setPassword(e.target.value)}
               required
               autoComplete="current-password"
-              className="mt-2 w-full rounded-xl border border-[var(--stroke)] bg-[var(--surface)] px-3 py-2 text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
+              className="mt-2 w-full rounded-xl border border-[var(--stroke)] bg-[var(--surface)] px-4 py-3 text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
             />
           </div>
           {error && (
-            <p className="text-xs font-semibold text-red-500">{error}</p>
+            <p className="rounded-xl bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-500">{error}</p>
           )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-full bg-[var(--secondary-purple)] px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-white transition hover:brightness-110 disabled:opacity-50"
+            className="mt-2 w-full rounded-full bg-[var(--secondary-purple)] px-4 py-3 text-xs font-semibold uppercase tracking-wide text-white transition hover:brightness-110 disabled:opacity-50"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>

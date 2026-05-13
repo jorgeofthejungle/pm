@@ -1,4 +1,3 @@
-import clsx from "clsx";
 import { useDroppable } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import type { Card, Column } from "@/lib/kanban";
@@ -8,6 +7,7 @@ import { NewCardForm } from "@/components/NewCardForm";
 type KanbanColumnProps = {
   column: Column;
   cards: Card[];
+  accentColor: string;
   onRename: (columnId: string, title: string) => void;
   onAddCard: (columnId: string, title: string, details: string) => void;
   onDeleteCard: (columnId: string, cardId: string) => void;
@@ -17,6 +17,7 @@ type KanbanColumnProps = {
 export const KanbanColumn = ({
   column,
   cards,
+  accentColor,
   onRename,
   onAddCard,
   onDeleteCard,
@@ -27,48 +28,55 @@ export const KanbanColumn = ({
   return (
     <section
       ref={setNodeRef}
-      className={clsx(
-        "flex min-h-[520px] flex-col rounded-3xl border border-[var(--stroke)] bg-[var(--surface-strong)] p-4 shadow-[var(--shadow)] transition",
-        isOver && "ring-2 ring-[var(--accent-yellow)]"
-      )}
+      className="flex min-h-[520px] flex-col overflow-hidden rounded-3xl border border-[var(--stroke)] bg-[var(--surface-strong)] shadow-[var(--shadow)] transition-all duration-200"
+      style={isOver ? { boxShadow: `0 0 0 2px ${accentColor}, var(--shadow)` } : undefined}
       data-testid={`column-${column.id}`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="w-full">
-          <div className="flex items-center gap-3">
-            <div className="h-2 w-10 rounded-full bg-[var(--accent-yellow)]" />
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gray-text)]">
-              {cards.length} cards
+      <div className="h-1 w-full shrink-0" style={{ background: accentColor }} />
+
+      <div className="flex flex-1 flex-col p-4">
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em]"
+              style={{ background: `${accentColor}18`, color: accentColor }}
+            >
+              {cards.length}
             </span>
-          </div>
-          <input
-            value={column.title}
-            onChange={(event) => onRename(column.id, event.target.value)}
-            className="mt-3 w-full bg-transparent font-display text-lg font-semibold text-[var(--navy-dark)] outline-none"
-            aria-label="Column title"
-          />
-        </div>
-      </div>
-      <div className="mt-4 flex flex-1 flex-col gap-3">
-        <SortableContext items={column.cardIds} strategy={verticalListSortingStrategy}>
-          {cards.map((card) => (
-            <KanbanCard
-              key={card.id}
-              card={card}
-              onDelete={(cardId) => onDeleteCard(column.id, cardId)}
-              onEdit={onEditCard}
+            <input
+              value={column.title}
+              onChange={(event) => onRename(column.id, event.target.value)}
+              className="mt-2 w-full bg-transparent font-display text-base font-semibold text-[var(--navy-dark)] outline-none transition placeholder:text-[var(--gray-text)]"
+              aria-label="Column title"
             />
-          ))}
-        </SortableContext>
-        {cards.length === 0 && (
-          <div className="flex flex-1 items-center justify-center rounded-2xl border border-dashed border-[var(--stroke)] px-3 py-6 text-center text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gray-text)]">
-            Drop a card here
           </div>
-        )}
+        </div>
+
+        <div className="mt-4 flex flex-1 flex-col gap-2.5">
+          <SortableContext items={column.cardIds} strategy={verticalListSortingStrategy}>
+            {cards.map((card) => (
+              <KanbanCard
+                key={card.id}
+                card={card}
+                onDelete={(cardId) => onDeleteCard(column.id, cardId)}
+                onEdit={onEditCard}
+              />
+            ))}
+          </SortableContext>
+          {cards.length === 0 && (
+            <div
+              className="flex flex-1 items-center justify-center rounded-2xl border border-dashed px-3 py-6 text-center text-xs font-semibold uppercase tracking-[0.2em] transition-colors"
+              style={{ borderColor: `${accentColor}40`, color: `${accentColor}99` }}
+            >
+              Drop a card here
+            </div>
+          )}
+        </div>
+
+        <NewCardForm
+          onAdd={(title, details) => onAddCard(column.id, title, details)}
+        />
       </div>
-      <NewCardForm
-        onAdd={(title, details) => onAddCard(column.id, title, details)}
-      />
     </section>
   );
 };

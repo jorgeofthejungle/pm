@@ -19,7 +19,7 @@ export default function Home() {
   if (auth === "loading") {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-[var(--gray-text)]">Loading...</p>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--stroke)] border-t-[var(--primary-blue)]" />
       </div>
     );
   }

@@ -21,6 +21,8 @@ import { CardModal } from "@/components/CardModal";
 import { moveCard, type BoardData } from "@/lib/kanban";
 import { api } from "@/lib/api";
 
+const COLUMN_COLORS = ["#ecad0a", "#209dd7", "#753991", "#22c55e", "#f97316"] as const;
+
 type KanbanBoardProps = {
   onLogout: () => void;
 };
@@ -148,12 +150,13 @@ export const KanbanBoard = ({ onLogout }: KanbanBoardProps) => {
   if (!board) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <p className="text-sm text-[var(--gray-text)]">Loading...</p>
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--stroke)] border-t-[var(--primary-blue)]" />
       </div>
     );
   }
 
   const activeCard = activeCardId ? cardsById[activeCardId] : null;
+  const totalCards = board.columns.reduce((sum, col) => sum + col.cardIds.length, 0);
 
   return (
     <div className="relative overflow-hidden">
@@ -162,69 +165,51 @@ export const KanbanBoard = ({ onLogout }: KanbanBoardProps) => {
 
       <main
         className={clsx(
-          "relative mx-auto flex min-h-screen max-w-[1500px] flex-col gap-10 px-6 pb-16 pt-12",
+          "relative mx-auto flex min-h-screen max-w-[1500px] flex-col gap-8 px-6 pb-16 pt-10",
           "transition-[padding] duration-300",
           sidebarOpen && "lg:pr-[calc(24px+384px)]",
         )}
       >
-        <header className="flex flex-col gap-6 rounded-[32px] border border-[var(--stroke)] bg-white/80 p-8 shadow-[var(--shadow)] backdrop-blur">
-          <div className="flex flex-wrap items-start justify-between gap-6">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[var(--gray-text)]">
-                Single Board Kanban
-              </p>
-              <h1 className="mt-3 font-display text-4xl font-semibold text-[var(--navy-dark)]">
-                Kanban Studio
-              </h1>
-              <p className="mt-3 max-w-xl text-sm leading-6 text-[var(--gray-text)]">
-                Keep momentum visible. Rename columns, drag cards between stages,
-                and capture quick notes without getting buried in settings.
-              </p>
-            </div>
-            <div className="flex flex-col items-end gap-3">
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setSidebarOpen((o) => !o)}
-                  aria-expanded={sidebarOpen}
-                  aria-controls="ai-sidebar"
-                  className={clsx(
-                    "rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] transition",
-                    sidebarOpen
-                      ? "bg-[var(--secondary-purple)] text-white hover:brightness-110"
-                      : "border border-[var(--stroke)] text-[var(--primary-blue)] hover:border-[var(--primary-blue)]",
-                  )}
-                >
-                  AI
-                </button>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="rounded-full border border-[var(--stroke)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gray-text)] transition hover:text-[var(--navy-dark)]"
-                >
-                  Sign out
-                </button>
-              </div>
-              <div className="rounded-2xl border border-[var(--stroke)] bg-[var(--surface)] px-5 py-4">
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--gray-text)]">
-                  Focus
-                </p>
-                <p className="mt-2 text-lg font-semibold text-[var(--primary-blue)]">
-                  One board. Five columns. Zero clutter.
-                </p>
-              </div>
+        <header className="flex items-center justify-between gap-6 rounded-[28px] border border-[var(--stroke)] bg-white/80 px-8 py-6 shadow-[var(--shadow)] backdrop-blur">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-[var(--gray-text)]">
+              Single Board Kanban
+            </p>
+            <h1 className="mt-1.5 font-display text-3xl font-semibold text-[var(--navy-dark)]">
+              Kanban Studio
+            </h1>
+            <div className="mt-3 flex items-center gap-4">
+              <span className="text-xs text-[var(--gray-text)]">
+                <span className="font-semibold text-[var(--navy-dark)]">{board.columns.length}</span> columns
+              </span>
+              <span className="h-1 w-1 rounded-full bg-[var(--stroke)]" />
+              <span className="text-xs text-[var(--gray-text)]">
+                <span className="font-semibold text-[var(--navy-dark)]">{totalCards}</span> cards
+              </span>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-4">
-            {board.columns.map((column) => (
-              <div
-                key={column.id}
-                className="flex items-center gap-2 rounded-full border border-[var(--stroke)] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--navy-dark)]"
-              >
-                <span className="h-2 w-2 rounded-full bg-[var(--accent-yellow)]" />
-                {column.title}
-              </div>
-            ))}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setSidebarOpen((o) => !o)}
+              aria-expanded={sidebarOpen}
+              aria-controls="ai-sidebar"
+              className={clsx(
+                "rounded-full px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] transition",
+                sidebarOpen
+                  ? "bg-[var(--secondary-purple)] text-white hover:brightness-110"
+                  : "border border-[var(--stroke)] text-[var(--secondary-purple)] hover:border-[var(--secondary-purple)]/40 hover:bg-[var(--secondary-purple)]/5",
+              )}
+            >
+              AI
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="rounded-full border border-[var(--stroke)] px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--gray-text)] transition hover:border-[var(--navy-dark)]/20 hover:text-[var(--navy-dark)]"
+            >
+              Sign out
+            </button>
           </div>
         </header>
 
@@ -234,12 +219,13 @@ export const KanbanBoard = ({ onLogout }: KanbanBoardProps) => {
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <section className="grid gap-6 lg:grid-cols-5">
-            {optimisticColumns.map((column) => (
+          <section className="grid gap-5 lg:grid-cols-5">
+            {optimisticColumns.map((column, index) => (
               <KanbanColumn
                 key={column.id}
                 column={column}
                 cards={column.cardIds.map((cardId) => board.cards[cardId]).filter(Boolean)}
+                accentColor={COLUMN_COLORS[index % COLUMN_COLORS.length]}
                 onRename={handleRenameColumn}
                 onAddCard={handleAddCard}
                 onDeleteCard={handleDeleteCard}

@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 const initialFormState = { title: "", details: "" };
 
@@ -9,12 +9,15 @@ type NewCardFormProps = {
 export const NewCardForm = ({ onAdd }: NewCardFormProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [formState, setFormState] = useState(initialFormState);
+  const titleRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (isOpen) titleRef.current?.focus();
+  }, [isOpen]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!formState.title.trim()) {
-      return;
-    }
+    if (!formState.title.trim()) return;
     onAdd(formState.title.trim(), formState.details.trim());
     setFormState(initialFormState);
     setIsOpen(false);
@@ -23,14 +26,15 @@ export const NewCardForm = ({ onAdd }: NewCardFormProps) => {
   return (
     <div className="mt-4">
       {isOpen ? (
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-2.5">
           <input
+            ref={titleRef}
             value={formState.title}
             onChange={(event) =>
               setFormState((prev) => ({ ...prev, title: event.target.value }))
             }
             placeholder="Card title"
-            className="w-full rounded-xl border border-[var(--stroke)] bg-white px-3 py-2 text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
+            className="w-full rounded-xl border border-[var(--stroke)] bg-white px-3 py-2.5 text-sm font-medium text-[var(--navy-dark)] outline-none transition focus:border-[var(--primary-blue)]"
             required
           />
           <textarea
@@ -38,9 +42,9 @@ export const NewCardForm = ({ onAdd }: NewCardFormProps) => {
             onChange={(event) =>
               setFormState((prev) => ({ ...prev, details: event.target.value }))
             }
-            placeholder="Details"
-            rows={3}
-            className="w-full resize-none rounded-xl border border-[var(--stroke)] bg-white px-3 py-2 text-sm text-[var(--gray-text)] outline-none transition focus:border-[var(--primary-blue)]"
+            placeholder="Details (optional)"
+            rows={2}
+            className="w-full resize-none rounded-xl border border-[var(--stroke)] bg-white px-3 py-2.5 text-xs text-[var(--gray-text)] outline-none transition focus:border-[var(--primary-blue)]"
           />
           <div className="flex items-center gap-2">
             <button
@@ -65,9 +69,9 @@ export const NewCardForm = ({ onAdd }: NewCardFormProps) => {
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="w-full rounded-full border border-dashed border-[var(--stroke)] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--primary-blue)] transition hover:border-[var(--primary-blue)]"
+          className="w-full rounded-full border border-dashed border-[var(--stroke)] px-3 py-2 text-xs font-semibold uppercase tracking-wide text-[var(--gray-text)] transition hover:border-[var(--primary-blue)] hover:text-[var(--primary-blue)]"
         >
-          Add a card
+          + Add a card
         </button>
       )}
     </div>

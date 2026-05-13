@@ -111,9 +111,31 @@ export const AiSidebar = ({ open, onClose, onBoardMutated }: AiSidebarProps) => 
         {/* Message list */}
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           {messages.length === 0 && !thinking && (
-            <p className="text-center text-xs text-[var(--gray-text)] mt-8 leading-6">
-              Ask me to add, move, or edit cards — or ask anything about your board.
-            </p>
+            <div className="mt-10 flex flex-col items-center gap-4 px-4 text-center">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[var(--secondary-purple)]/10">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="22" height="22" style={{ color: "var(--secondary-purple)" }}>
+                  <path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm0 14.5A6.5 6.5 0 1110 3.5a6.5 6.5 0 010 13zm.75-9.75a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0V6.75zm0 5.5a.75.75 0 00-1.5 0v.5a.75.75 0 001.5 0v-.5z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-[var(--navy-dark)]">AI Assistant</p>
+                <p className="mt-1.5 text-xs leading-5 text-[var(--gray-text)]">
+                  Ask me to add, move, or edit cards. Describe what you need and I will update the board.
+                </p>
+              </div>
+              <div className="w-full space-y-2 text-left">
+                {["Move all blocked cards to Backlog", "Add a card for the API redesign", "What is in Review right now?"].map((hint) => (
+                  <button
+                    key={hint}
+                    type="button"
+                    onClick={() => setInput(hint)}
+                    className="w-full rounded-xl border border-[var(--stroke)] bg-[var(--surface)] px-3 py-2 text-left text-xs text-[var(--gray-text)] transition hover:border-[var(--primary-blue)]/30 hover:text-[var(--navy-dark)]"
+                  >
+                    {hint}
+                  </button>
+                ))}
+              </div>
+            </div>
           )}
 
           {messages.map((msg, i) => (
